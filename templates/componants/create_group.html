@@ -1,0 +1,32 @@
+{% extends 'componants/nav.html' %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0">Create Group</h1>
+                </div>
+                <div class="card-body">
+                    <form action="{% url 'create_group' %}" method="POST" id="create_group_form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="name">Group Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary" id="create_group_button">Create Group</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+

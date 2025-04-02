@@ -1,0 +1,100 @@
+{% extends 'componants/nav.html' %}
+{% block content %}
+<div class="container">
+  
+  <div class="card mb-3">
+    <h1 class="card-header">Group: {{ group.name }}</h1>
+    <div class="card-body">
+      <p class="card-text">Description: {{ group.description }}</p>
+      <p class="card-text">Created At: {{ group.created_at|date:"F j, Y, g:i a" }}</p>
+      {% if user == group.admin %}
+          <a href="{% url 'edit_group' group.id %}" class="btn btn-primary">Edit Group</a>
+      {% endif %}
+      <a href="{% url 'leave_group' group.id %}" class="btn btn-danger">Leave Group</a>
+    </div>
+  </div>
+  <div class="card mb-3">
+    <h2 class="card-header">Members</h2>
+    <div class="card-body">
+      {% if group.members.all %}
+          <ul class="list-group">
+            {% for member in group.members.all %}
+              <li class="list-group-item">
+                {{ member.username }}
+                {% if member == group.admin %}
+                    (Admin)
+                {% endif %}
+                <a href="{% url 'profile' member.username %}">View Profile</a>
+                {% if user == group.admin %}
+                    <a href="{% url 'remove_member' group.id member.id %}" class="btn btn-danger">Remove</a>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+      {% else %}
+          <p class="card-text">No members</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="btn-toolbar mb-3" role="toolbar">
+    <button id="group_requests_button" class="btn btn-primary" onClick="toggleVisibility('group_requests_div')">Show/Hide Group Requests</button>
+    <button id="create_post_button" class="btn btn-primary" onClick="toggleVisibility('create_post_div')">Show/Hide Create Post</button>
+    <button id="posts_button" class="btn btn-primary" onClick="toggleVisibility('posts_div')">Show/Hide Posts</button>
+  </div>
+  <div class="card mb-3 d-none"  id="group_requests_div">
+    {% if user == group.admin %}
+        <h2 class="card-header">Group Requests</h2>
+        <div class="card-body">
+          {% for request in group.requests.all %}
+              <div class="card mb-3">
+                <div class="card-body">
+                  <h5 class="card-title">{{ request.user.username }}</h5>
+                  <p class="card-text">Created At: {{ request.created_at|date:"F j, Y, g:i a" }}</p>
+                  <a href="{% url 'accept_request' group.id request.id %}" class="btn btn-primary">Accept</a>
+                  <a href="{% url 'reject_request' group.id request.id %}" class="btn btn-danger">Decline</a>
+                </div>
+              </div>
+          {% endfor %}
+        </div>
+    {% endif %}
+  </div>
+  <div class="card mb-3 d-none" id="create_post_div">
+    <h2 class="card-header">Create Post</h2>
+    <div class="card-body">
+      <form action="{% url 'create_post_group' group.id %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input type="text" class="form-control" id="title" name="title" required>
+        </div>
+        <div class="form-group">
+          <label for="content">Content</label>
+          <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Post</button>
+      </form>
+    </div>
+  </div>
+  <div class="card mb-3 d-none" id="posts_div">
+    <h2 class="card-header">Posts</h2>
+    <div class="card-body">
+      {% for post in group.posts.all %}
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title">{{ post.title }}</h5>
+              <p class="card-text">Created At: {{ post.created_at|date:"F j, Y, g:i a" }}</p>
+              <p class="card-text">Reactions: {{ post.post_reactions.count }}</p>
+              <a href="{% url 'view_post' post.id %}" class="btn btn-primary">View Post</a>
+            </div>
+          </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<script>
+  function toggleVisibility(id) {
+    document.getElementById(id).classList.toggle('d-none');
+  }
+</script>
+{% endblock %}
+

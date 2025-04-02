@@ -1,0 +1,318 @@
+{% extends 'componants/nav.html' %}
+{% block content %}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</head>
+<div class="container">
+  <h1 class="text-center">Home Page</h1>
+  <div class="accordion" id="accordionExample">
+    <div class="card">
+      <div class="card-header" id="headingOne">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            Create Post
+          </button>
+        </h2>
+      </div>
+      <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+        <div class="card-body">
+          <form action="{% url 'create_post' %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="title">Title</label>
+              <input type="text" class="form-control" id="title" name="title" required/>
+            </div>
+            <div class="form-group">
+              <label for="content">Content</label>
+              <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Post</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" id="headingTwo">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+            Create Group
+          </button>
+        </h2>
+      </div>
+      <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+        <div class="card-body">
+          <form action="{% url 'create_group' %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="name">Group Name</label>
+              <input type="text" class="form-control" id="group_name" name="name" required/>
+            </div>
+            <div class="form-group">
+              <label for="description">Group Description</label>
+              <textarea class="form-control" id="group_description" name="description" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Group</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" id="headingThree">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
+            Your Posts
+          </button>
+        </h2>
+      </div>
+      <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+        <div class="card-body">
+          {% for post in user.posts.all %}
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="card-title">{{ post.title }}</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">{{ post.content }}</p>
+            </div>
+            <div class="card-footer">
+              <small class="text-muted">Created at: {{ post.created_at }}</small>
+            </div>
+            <a href="{% url 'view_post' post.id %}" class="btn btn-primary">View Post</a>
+            <a href="{% url 'delete_post' post.id %}" class="btn btn-danger">Delete</a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" id="headingFour">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
+            Your Groups
+          </button>
+        </h2>
+      </div>
+      <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordionExample">
+        <div class="card-body">
+          {% for group in user.groups_joined.all %}
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="card-title">{{ group.name }}</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">{{ group.description }}</p>
+            </div>
+            <a href="{% url 'view_group' group.id %}" class="btn btn-primary">View Group</a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" id="headingSix">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseSix" aria-expanded="true" aria-controls="collapseSix">
+            Public Groups
+          </button>
+        </h2>
+      </div>
+      <div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#accordionExample">
+        <div class="card-body">
+          {% for group in public_groups %}
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="card-title">{{ group.name }}</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">{{ group.description }}</p>
+            </div>
+            {% if user in group.members.all %}
+            <a href="{% url 'view_group' group.id %}" class="btn btn-primary">View Group</a>
+            {% else %}
+            {% if group in user.groups_requested.all %}
+            <p>Group Request Sent , waiting for approval</p>
+            <a href="{% url 'cancel_group_request' group.id %}" class="btn btn-danger">Cancel Request</a>
+            {% else %}
+            <a href="{% url 'send_group_request' group.id %}" class="btn btn-primary">Join Group</a>
+            {% endif %}
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" id="headingFive">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left" type="button" onClick="toggleVisibility('posts_div')" data-toggle="collapse" data-target="#collapseFive" aria-expanded="true" aria-controls="collapseFive">
+            Groups I Admin
+          </button>
+        </h2>
+      </div>
+      <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordionExample">
+        <div class="card-body">
+          {% for group in user.groups_moderated.all %}
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="card-title">{{ group.name }}</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">{{ group.description }}</p>
+            </div>
+            <a href="{% url 'view_group' group.id %}" class="btn btn-primary">View Group</a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" id="headingSix">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseSix" aria-expanded="true" aria-controls="collapseSix">
+            Friend Requests Sent
+          </button>
+        </h2>
+      </div>
+      <div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#accordionExample">
+        <div class="card-body">
+          {% for request in friend_requests_sent %}
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="card-title">{{ request.friend.username }}</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">Sent At: {{ request.created_at }}</p>
+            </div>
+            <a href="{% url 'reject_friend_request' request.id %}" class="btn btn-danger">Decline</a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" id="headingSeven">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="true" aria-controls="collapseSeven">
+            Friend Requests Received
+          </button>
+        </h2>
+      </div>
+      <div id="collapseSeven" class="collapse" aria-labelledby="headingSeven" data-parent="#accordionExample">
+        <div class="card-body">
+          {% for request in friend_requests_received %}
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="card-title">{{ request.user.username }}</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">Sent At: {{ request.created_at }}</p>
+            </div>
+            <a href="{% url 'accept_friend_request' request.id %}" class="btn btn-primary">Accept</a>
+            <a href="{% url 'reject_friend_request' request.id %}" class="btn btn-danger">Reject</a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" id="headingEight">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseEight" aria-expanded="true" aria-controls="collapseEight">
+            Friends
+          </button>
+        </h2>
+      </div>
+      <div id="collapseEight" class="collapse" aria-labelledby="headingEight" data-parent="#accordionExample">
+        <div class="card-body">
+          {% for friend in user.friends.all %}
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="card-title">{{ friend.friend.username }}</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">Since: {{ friend.created_at }}</p>
+            </div>
+            <div>
+              <a href="{% url 'profile' friend.friend.username %}" class="btn btn-primary">View Profile</a>
+              <a href="{% url 'unfriend' friend.friend.id %}" class="btn btn-danger">Unfriend</a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" id="headingNine">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseNine" aria-expanded="true" aria-controls="collapseNine">
+            Group Requests
+          </button>
+        </h2>
+      </div>
+      <div id="collapseNine" class="collapse" aria-labelledby="headingNine" data-parent="#accordionExample">
+        <div class="card-body">
+          {% for request in group_requests_received %}
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="card-title">{{ request.user.username }}</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">Sent At: {{ request.created_at }}</p>
+            </div>
+            <a href="{% url 'accept_group_request' request.id %}" class="btn btn-primary">Accept</a>
+            <a href="{% url 'reject_group_request' request.id %}" class="btn btn-danger">Decline</a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseTen" aria-expanded="true" aria-controls="collapseTen">
+            Group Requests Sent
+          </button>
+        </h2>
+      </div>
+      <div id="collapseTen" class="collapse" aria-labelledby="headingTen" data-parent="#accordionExample">
+        <div class="card-body">
+          {% for group_request in group_requests_sent %}
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="card-title">{{ group_request.group.name }}</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">Sent At: {{ group_request.created_at }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <h1>Public Posts</h1>
+  <button class="btn btn-primary" onClick="toggleVisibility('public_posts')">Toggle</button>
+  <div id="public_posts" class="d-none">
+    {% for post in posts %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{{ post.title }}</h5>
+        <p class="card-text">Created At: {{ post.created_at|date:"F j, Y, g:i a" }}</p>
+        <p class="card-text">Reactions: {{ post.post_reactions.count }}</p>
+        <a href="{% url 'view_post' post.id %}" class="btn btn-primary">View Post</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <script>
+    function toggleVisibility(divId) {
+      var div = document.getElementById(divId);
+      div.classList.toggle('d-none');
+    }
+  </script>
+</div>
+{% endblock %}
+

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <title>Edit Profile</title>
+</head>
+<body>
+    {% extends 'componants/nav.html' %}
+    {% block content %}
+      <div class="container">
+        <h1 class="text-center">Edit Profile</h1>
+        <form action="" method="POST" enctype="multipart/form-data" id="edit_profile_form">
+          {% csrf_token %}
+          <div class="form-group">
+            <div class="row justify-content-center">
+              <div class="col-md-6">
+                <label for="image">Profile Picture</label>
+                <div class="input-group mb-3">
+                  <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="profile_picture" name="image" value="{{ user.profile.image.url }}" />
+                    <label class="custom-file-label" for="profile_picture">Choose file</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="bio">Bio</label>
+            <textarea class="form-control" id="bio" name="bio" rows="3">{{ user.profile.bio|default_if_none:'' }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="edit_profile_button">Save Changes</button>
+        </form>
+      </div>
+      <div class="container">
+        {% include 'componants/footer.html' %}
+      </div>
+      <script>
+        document.getElementById('edit_profile_button').addEventListener('click', function () {
+          showHide('edit_profile_form')
+        })
+      </script>
+    {% endblock %}
+</body>
+
